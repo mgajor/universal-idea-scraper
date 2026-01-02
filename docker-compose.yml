@@ -4,6 +4,27 @@ version: '3.8'
 # Start with: docker-compose up -d
 
 services:
+  # ============================================
+  # PostgreSQL Database (Local Development)
+  # ============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: reddit_ops_db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: reddit_ops
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d reddit_ops"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   # Main Scraper (run scrape jobs)
   scraper:
     build: .
@@ -81,7 +102,8 @@ services:
 #       - api
 #       - dashboard
 
-# volumes:
+volumes:
+  postgres_data:
 #   metabase-data:
 
 # ===========================================
